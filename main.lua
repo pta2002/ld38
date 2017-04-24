@@ -25,6 +25,7 @@ function love.load()
     font = love.graphics.newFont("res/raleway.ttf", 20)
     font_big = love.graphics.newFont("res/raleway.ttf", 38)
     start_fade = 1
+    end_fade = 0
 
     lost = false
     start = true
@@ -55,8 +56,10 @@ function love.keypressed(key, sc, isrepeat)
             shoot_sound:setPitch(love.math.random()+1)
             shoot_sound:play()
         end
-    else
+    elseif start == true then
         start = false
+    elseif lost == true then
+        love.event.quit("restart")
     end
 end
 
@@ -132,6 +135,10 @@ function love.update(dt)
 
     if lives <= 0 then
         shrink_speed = 300
+    end
+
+    if lost and loseanim <= 0 and end_fade < 1 then
+        end_fade = end_fade + dt
     end
 
     if not lost and not start then
@@ -258,6 +265,13 @@ function love.draw()
     love.graphics.setFont(font)
     love.graphics.printf("arrows to move\nz to jump\nx to shoot", love.graphics.getWidth()/2-100, love.graphics.getHeight()/2, 200, 'center')
     love.graphics.printf("made by pta2002 for LD38", love.graphics.getWidth()-400, love.graphics.getHeight()-30, 390, 'right')
+
+    love.graphics.setColor(0, 0, 0, 255*end_fade)
+    love.graphics.setFont(font_big)
+    love.graphics.printf("game over", love.graphics.getWidth()/2-200, love.graphics.getHeight()/2, 400, 'center')
+    love.graphics.setFont(font)
+    love.graphics.printf("score: " .. math.floor(score), love.graphics.getWidth()/2-200, love.graphics.getHeight()/2+40, 400, 'center')
+    love.graphics.printf("press any key to restart", love.graphics.getWidth()/2-200, love.graphics.getHeight()/2-10, 400, 'center')
 
     love.graphics.setColor(0, 0, 0, 255)
     if not lost then
