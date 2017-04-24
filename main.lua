@@ -289,7 +289,7 @@ function love.draw()
             love.graphics.setColor(255, 255, 255)
             love.graphics.ellipse("fill", love.graphics.getWidth()/2+math.cos(pos)*(circle_size+height), love.graphics.getHeight()/2+math.sin(pos)*(circle_size+height), player_rx, player_ry)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.ellipse("line", love.graphics.getWidth()/2+math.cos(pos)*(circle_size+height), love.graphics.getHeight()/2+math.sin(pos)*(circle_size+height), player_rx, player_ry)
+            love.graphics.ellipse("line", love.graphics.getWidth()/2+math.cos(pos)*(circle_size+height), love.graphics.getHeight()/2+math.sin(pos)*(circle_size+height), player_rx, player_ry, 50)
         end
     end
 
