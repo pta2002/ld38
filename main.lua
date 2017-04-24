@@ -64,7 +64,6 @@ function love.keypressed(key, sc, isrepeat)
 end
 
 function love.update(dt)
-    require "lovebird":update()
     if not lost then
         if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
             pos = pos + (200/(circle_size + height)) * dt
