@@ -11,6 +11,7 @@ function love.load()
     height = 0 -- Height
     circle_size = 100 -- radius in px
     badies = {}
+    score = 0
     dir = 1
     vsp = 0
 
@@ -21,11 +22,12 @@ function love.load()
     py = 0
     ry_sp = 0
 
-    player_sprite = love.graphics.newImage("res/player.png")
-    player_sprite:setFilter("nearest")
-    player_cur = 0 -- Current frame, 0 to 3
+    font = love.graphics.newFont("res/raleway.ttf", 20)
+    font_big = love.graphics.newFont("res/raleway.ttf", 38)
+    start_fade = 1
 
     lost = false
+    start = true
     particles = {}
     enemies = {}
     bullets = {}
@@ -42,19 +44,19 @@ function love.load()
 end
 
 function love.keypressed(key, sc, isrepeat)
-    if not isrepeat and (key == "space" or key == "z") and height == 0 then
-        vsp = 125
-    elseif not isrepeat and key == "x" then
-        table.insert(bullets, {pos=pos, height=height, dir=dir, shot=true})
-        screenshake = 0.1
-    elseif not isrepeat and key == "return" then
-        for i=0,love.math.random(5,10) do
-            local px = love.math.random(-30, 30) + love.graphics.getWidth()/2+math.cos(pos)*(circle_size+height)
-            local py = love.math.random(-30, 30) + love.graphics.getHeight()/2+math.sin(pos)*(circle_size+height)
-            local psize = love.math.random(0, 20)
-            table.insert(particles, {x=px, y=py, size=psize, dir = dir})
-            screenshake = math.max(0.5, screenshake) -- Secs of screenshake
+    if not lost and not start then
+        if not isrepeat and (key == "space" or key == "z") and height == 0 then
+            vsp = 125
+        elseif not isrepeat and key == "x" then
+            table.insert(bullets, {pos=pos, height=height, dir=dir, shot=true})
+            screenshake = 0.1
+            -- TODO: This is slow on hard drives...
+            local shoot_sound = love.audio.newSource("res/shoot.wav")
+            shoot_sound:setPitch(love.math.random()+1)
+            shoot_sound:play()
         end
+    else
+        start = false
     end
 end
 
@@ -76,13 +78,7 @@ function love.update(dt)
         end
         height = height + vsp * dt
 
-        circle_size = circle_size - shrink_speed * dt
-        if circle_size <= 5 then
-            screenshake = math.max(2, screenshake)
-            loseanim = math.max(2, loseanim)
-            lost = true
-        end
-    end
+   end
 
     if loseanim > 0 then
         if loseanimtimeout <= 0 then
@@ -92,6 +88,9 @@ function love.update(dt)
                 local psize = love.math.random(0, 30)
                 table.insert(particles, {x=px, y=py, size=psize})
             end
+            local explode_sound = love.audio.newSource("res/explode.wav", "static")
+            explode_sound:setPitch(love.math.random()*0.2+1)
+            explode_sound:play()
             loseanimtimeout = 0.2
         else
             loseanimtimeout = loseanimtimeout - dt
@@ -135,7 +134,13 @@ function love.update(dt)
         shrink_speed = 300
     end
 
-    if not lost then
+    if not lost and not start then
+        if start_fade > 0 then
+            start_fade = start_fade - dt
+        else
+            start_fade = 0
+        end
+        score = score + dt
         for i, enemy in ipairs(enemies) do
             enemy.pos = enemy.pos + enemy.dir*0.3*dt
             local enemyPos = {x=love.graphics.getWidth()/2+math.cos(enemy.pos)*circle_size,y=love.graphics.getHeight()/2+math.sin(enemy.pos)*circle_size}
@@ -152,6 +157,9 @@ function love.update(dt)
                     local psize = love.math.random(0, 10)
                     table.insert(particles, {x=px, y=py, size=psize})
                 end
+                local explode_sound = love.audio.newSource("res/explode.wav", "static")
+                explode_sound:setPitch(love.math.random()*0.2+1)
+                explode_sound:play()
             end
         end
         for i2, bullet in ipairs(bullets) do
@@ -173,6 +181,9 @@ function love.update(dt)
                     table.remove(enemies, i)
                     table.remove(bullets, i2)
                     alive = false
+                    local explode_sound = love.audio.newSource("res/explode.wav", "static")
+                    explode_sound:setPitch(love.math.random()*0.2+1)
+                    explode_sound:play()
                 end
             end
             if alive and imunity <= 0 then
@@ -189,6 +200,10 @@ function love.update(dt)
                             local psize = love.math.random(0, 10)
                             table.insert(particles, {x=px, y=py, size=psize})
                         end
+                        local explode_sound = love.audio.newSource("res/explode.wav", "static")
+                        explode_sound:setPitch(love.math.random()*0.2+1)
+                        explode_sound:play()
+
                         table.remove(bullets, i2)
                     end
                 elseif bullet.shot and d > 20 then
@@ -197,7 +212,7 @@ function love.update(dt)
             end
         end
         if spawntimeout <= 0 then
-            if love.math.random(0,2) == 0 then
+            if love.math.random(0,1) == 0 then
                 local p = love.math.random() * 2*PI
                 local d = 0
                 if love.math.random(0,1) == 0 then
@@ -217,6 +232,13 @@ function love.update(dt)
         else
             spawntimeout = spawntimeout - dt
         end
+        circle_size = circle_size - shrink_speed * dt
+        if circle_size <= 5 then
+            screenshake = math.max(2, screenshake)
+            loseanim = math.max(2, loseanim)
+            lost = true
+        end
+ 
     end
 end
 
@@ -230,10 +252,18 @@ function love.draw()
         love.graphics.translate(love.math.random(-5, 5), love.math.random(-5, 5))
     end
 
+    love.graphics.setColor(0, 0, 0, 255*start_fade)
+    love.graphics.setFont(font_big)
+    love.graphics.printf("welcome to", love.graphics.getWidth()/2-200, love.graphics.getHeight()/2-circle_size-50, 400, 'center')
+
+    love.graphics.setColor(0, 0, 0, 255)
     if not lost then
         for i=1,lives do
             love.graphics.circle("line", i*30, 25, 10, 40)
         end
+
+        love.graphics.setFont(font)
+        love.graphics.print(math.floor(score), love.graphics.getWidth()-100, 10)
 
         love.graphics.circle("line", love.graphics.getWidth()/2, love.graphics.getHeight()/2, circle_size)
         for i, enemy in ipairs(enemies) do
@@ -243,7 +273,7 @@ function love.draw()
             love.graphics.setColor(255, 255, 255)
             love.graphics.ellipse("fill", 0, 0, 20, 10)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.ellipse("line", 0, 0, 20, 10)
+            love.graphics.ellipse("line", 0, 0, 20, 10, 50)
             love.graphics.pop()
         end
 
