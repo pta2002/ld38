@@ -220,6 +220,9 @@ function love.update(dt)
         if spawntimeout <= 0 then
             if love.math.random(0,1) == 0 then
                 local p = love.math.random() * 2*PI
+                while math.abs(pos-p) < 1 do
+                    p = love.math.random() * 2*PI
+                end
                 local d = 0
                 if love.math.random(0,1) == 0 then
                     d = -1
@@ -238,7 +241,11 @@ function love.update(dt)
         else
             spawntimeout = spawntimeout - dt
         end
-        circle_size = circle_size - shrink_speed * dt
+        if #enemies == 0 and lives > 0 then
+            circle_size = circle_size - shrink_speed*0.5 * dt
+        else
+            circle_size = circle_size - shrink_speed * dt
+        end
         if circle_size <= 5 then
             screenshake = math.max(2, screenshake)
             loseanim = math.max(2, loseanim)
