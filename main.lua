@@ -255,6 +255,9 @@ function love.draw()
     love.graphics.setColor(0, 0, 0, 255*start_fade)
     love.graphics.setFont(font_big)
     love.graphics.printf("welcome to", love.graphics.getWidth()/2-200, love.graphics.getHeight()/2-circle_size-50, 400, 'center')
+    love.graphics.setFont(font)
+    love.graphics.printf("arrows to move\nz to jump\nx to shoot", love.graphics.getWidth()/2-100, love.graphics.getHeight()/2, 200, 'center')
+    love.graphics.printf("made by pta2002 for LD38", love.graphics.getWidth()-400, love.graphics.getHeight()-30, 390, 'right')
 
     love.graphics.setColor(0, 0, 0, 255)
     if not lost then
