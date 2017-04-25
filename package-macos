@@ -6,6 +6,10 @@ if [ ! -d build/macos-love ]; then
     unzip build/macos-love.zip -d build/macos-love
 fi
 
-cp -r build/macos-love/love.app build/o-macos.app
-cp build/o.love build/o-macos.app/Contents/Resources/
-cp manifests/Info.plist build/o-macos.app/Contents/Info.plist
+if [ -d build/o-macos ]; then
+    rm -r build/o-macos
+fi
+mkdir -p build/o-macos/
+cp -r build/macos-love/love.app build/o-macos/o.app
+cp build/o.love build/o-macos/o.app/Contents/Resources/
+cp manifests/Info.plist build/o-macos/o.app/Contents/Info.plist

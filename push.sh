@@ -6,4 +6,4 @@
 cd build
 butler push linux pta2002/o:linux-postjam
 butler push win32 pta2002/o:windows-postjam
-butler push o-macos.app pta2002/o:macos-postjam
+butler push o-macos pta2002/o:macos-postjam
