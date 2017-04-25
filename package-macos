@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+VERSION=love-0.10.2-macosx-x64
+
+if [ ! -d build/macos-love ]; then
+    wget https://bitbucket.org/rude/love/downloads/$VERSION.zip -O build/macos-love.zip
+    unzip build/macos-love.zip -d build/macos-love
+fi
+
+cp -r build/macos-love/love.app build/o-macos.app
+cp build/o.love build/o-macos.app/Contents/Resources/
+cp manifests/Info.plist build/o-macos.app/Contents/Info.plist

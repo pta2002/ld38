@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+VERSION=love-0.10.2-win32
+
+if [ ! -d build/win32-love ]; then
+    wget https://bitbucket.org/rude/love/downloads/$VERSION.zip -O build/win32-love.zip
+    unzip build/win32-love.zip -d build/win32-love
+fi
+
+mkdir -p build/win32
+cp build/win32-love/$VERSION/* build/win32 -r
+cat build/win32-love/$VERSION/love.exe build/o.love > build/win32/o.exe
+cp manifests/win32.toml build/win32/.itch.toml
+rm build/win32/love.exe

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+./package.sh
+mkdir -p build/linux
+cp build/o.love build/linux/o.love
+
+if [ ! -f build/linux/start.sh ]; then
+    echo '#!/usr/bin/env bash' > build/linux/start.sh
+    echo 'love o.love' >> build/linux/start.sh
+    chmod +x build/linux/start.sh
+fi
