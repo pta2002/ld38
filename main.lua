@@ -1,5 +1,11 @@
 PI = 3.14159265359
 
+function math.clamp(val, lower, upper)
+    assert(val and lower and upper, "not very useful error message here")
+    if lower > upper then lower, upper = upper, lower end -- swap if boundaries supplied the wrong way
+    return math.max(lower, math.min(upper, val))
+end
+
 local function sign(n)
     if n < 0 then return -1 end
     if n > 0 then return 1 end
@@ -63,14 +69,64 @@ function love.keypressed(key, sc, isrepeat)
     end
 end
 
+function love.touchpressed(id, x, y, dx, dy, pressure)
+    if start == true then
+        start = false
+    elseif lost == true then
+        love.load()
+    else
+        if math.pow(x-(love.graphics.getWidth()-100), 2) + math.pow(y-(love.graphics.getHeight()-100), 2) <= math.pow(60, 2) then
+            love.keypressed("x", nil, false)
+        elseif math.pow(x-(love.graphics.getWidth()-200), 2) + math.pow(y-(love.graphics.getHeight()-100), 2) <= math.pow(60, 2) then
+            love.keypressed("z", nil, false)
+        end
+    end
+end
+
+function getmove()
+    -- Helper function for mobile support
+    move = 0
+    if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
+        move = 1
+    elseif love.keyboard.isDown("left") or love.keyboard.isDown("a") then
+        move = -1
+    end
+    if love.system.getOS() == "Android" or love.system.getOS() == "iOS" then
+        local closestx = nil
+        local closesty = nil
+        if #love.touch.getTouches() == 0 then
+            closestx = 130
+            closesty = love.graphics.getHeight()-100
+        end
+        for i,touch in ipairs(love.touch.getTouches()) do
+            local px,py = love.touch.getPosition(touch)
+            if px < love.graphics.getWidth()/2 then
+                if closestx == nil or closesty == nil then
+                    closestx = px
+                    closesty = py
+                elseif math.pow(px-130, 2) + math.pow(py-(love.graphics.getHeight()-100), 2) < math.pow(closestx-130, 2) + math.pow(closesty-(love.graphics.getHeight()-100), 2) then
+                    closestx = px
+                    closesty = py
+                end
+            else
+                closestx = 130
+                closesty = love.graphics.getHeight()-100
+            end
+        end
+        move = math.clamp((closestx-130)/100, -1, 1)
+    end
+
+    return move
+end
+
 function love.update(dt)
     if not lost then
-        if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
-            pos = pos + (200/(circle_size + height)) * dt
-            dir = 1
-        elseif love.keyboard.isDown("left") or love.keyboard.isDown("a") then
-            pos = pos - (200/(circle_size + height)) * dt
+        local m = getmove()
+        pos = pos + (200/(circle_size + height)) * dt * m
+        if m < 0 then
             dir = -1
+        elseif m > 0 then
+            dir = 1
         end
 
         vsp = vsp - 300 * dt
@@ -281,7 +337,11 @@ function love.draw()
     love.graphics.printf("game over", math.floor(love.graphics.getWidth()/2-200), math.floor(love.graphics.getHeight()/2), 400, 'center')
     love.graphics.setFont(font)
     love.graphics.printf("score: " .. math.floor(score), math.floor(love.graphics.getWidth()/2-200), math.floor(love.graphics.getHeight()/2+40), 400, 'center')
-    love.graphics.printf("press any key to restart", math.floor(love.graphics.getWidth()/2-200), math.floor(love.graphics.getHeight()/2-10), 400, 'center')
+    if love.system.getOS() == "Android" or love.system.getOS() == "iOS" then
+        love.graphics.printf("tap to restart", math.floor(love.graphics.getWidth()/2-200), math.floor(love.graphics.getHeight()/2-10), 400, 'center')
+    else
+        love.graphics.printf("press any key to restart", math.floor(love.graphics.getWidth()/2-200), math.floor(love.graphics.getHeight()/2-10), 400, 'center')
+    end
 
     love.graphics.setColor(0, 0, 0, 255)
     if not lost then
@@ -318,10 +378,26 @@ function love.draw()
             love.graphics.setColor(0, 0, 0)
             love.graphics.ellipse("line", love.graphics.getWidth()/2+math.cos(pos)*(circle_size+height), love.graphics.getHeight()/2+math.sin(pos)*(circle_size+height), player_rx, player_ry, 50)
         end
+        if love.system.getOS() == "Android" or love.system.getOS() == "iOS" then
+            love.graphics.setColor(0, 0, 0, 255)
+            love.graphics.line(30, love.graphics.getHeight()-100, 230, love.graphics.getHeight()-100)
+            love.graphics.setColor(255, 255, 255, 255)
+            love.graphics.circle("fill", 130+getmove()*100, love.graphics.getHeight()-100, 15, 50)
+            love.graphics.setColor(0, 0, 0, 255)
+            love.graphics.circle("line", 130+getmove()*100, love.graphics.getHeight()-100, 15, 50)
+            
+            love.graphics.circle("line", love.graphics.getWidth()-200, love.graphics.getHeight()-100, 40, 50)
+            love.graphics.circle("line", love.graphics.getWidth()-100, love.graphics.getHeight()-100, 40, 50)
+            love.graphics.setFont(font)
+            love.graphics.printf("jump", love.graphics.getWidth()-200-30, love.graphics.getHeight()-100-10, 60, 'center')
+            love.graphics.printf("shoot", love.graphics.getWidth()-100-30, love.graphics.getHeight()-100-10, 60, 'center')
+        end
     end
 
     for i,particle in ipairs(particles) do
         -- TODO for post-jam: Use .circle
         love.graphics.ellipse("line", particle.x, particle.y, particle.size, particle.size)
     end
+
+    
 end
