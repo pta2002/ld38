@@ -4,6 +4,6 @@
 ./package-linux
 ./package-macos
 cd build
-butler push linux pta2002/o:linux
-butler push win32 pta2002/o:windows
-butler push o-macos.app pta2002/o:macos
+butler push linux pta2002/o:linux-postjam
+butler push win32 pta2002/o:windows-postjam
+butler push o-macos.app pta2002/o:macos-postjam
