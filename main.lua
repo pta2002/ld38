@@ -48,6 +48,7 @@ function love.load()
     lives = 3
 
     shrink_speed = 3
+    time_since_enemies = 0
 end
 
 function love.keypressed(key, sc, isrepeat)
@@ -298,9 +299,11 @@ function love.update(dt)
             spawntimeout = spawntimeout - dt
         end
         if #enemies == 0 and lives > 0 then
-            circle_size = circle_size - shrink_speed*0.5 * dt
+            circle_size = circle_size - shrink_speed*0.5/(time_since_enemies+1) * dt
+            time_since_enemies = time_since_enemies + dt
         else
             circle_size = circle_size - shrink_speed * dt
+            time_since_enemies = 0
         end
         if circle_size <= 5 then
             screenshake = math.max(2, screenshake)
