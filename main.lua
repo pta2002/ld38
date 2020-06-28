@@ -49,6 +49,8 @@ function love.load()
 
     shrink_speed = 3
     time_since_enemies = 0
+
+    shoot_sound = love.audio.newSource("res/shoot.wav", "static")
 end
 
 function love.keypressed(key, sc, isrepeat)
@@ -58,8 +60,6 @@ function love.keypressed(key, sc, isrepeat)
         elseif not isrepeat and key == "x" then
             table.insert(bullets, {pos=pos, height=height, dir=dir, shot=true})
             screenshake = 0.1
-            -- TODO: This is slow on hard drives...
-            local shoot_sound = love.audio.newSource("res/shoot.wav")
             shoot_sound:setPitch(love.math.random()+1)
             shoot_sound:play()
         end
