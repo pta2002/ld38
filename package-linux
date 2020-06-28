@@ -3,8 +3,12 @@
 mkdir -p build/linux
 cp build/o.love build/linux/o.love
 
+wget https://bitbucket.org/rude/love/downloads/love-11.3-x86_64.AppImage -O build/linux/love
+
+chmod +x build/linux/love
+
 if [ ! -f build/linux/start.sh ]; then
     echo '#!/usr/bin/env bash' > build/linux/start.sh
-    echo 'love o.love' >> build/linux/start.sh
+    echo './love o.love' >> build/linux/start.sh
     chmod +x build/linux/start.sh
 fi

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=love-0.10.2-win32
+VERSION=love-11.3-win32
 
 if [ ! -d build/win32-love ]; then
     wget https://bitbucket.org/rude/love/downloads/$VERSION.zip -O build/win32-love.zip
